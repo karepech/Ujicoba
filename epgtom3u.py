@@ -31,7 +31,6 @@ RX_SPOTV = re.compile(r'\bspo\s+tv\b')
 RX_KUALITAS = re.compile(r'\b(hd|fhd|uhd|4k|8k|tv|hevc|raw|plus|max|sd|hq)\b')
 RX_LIVE = re.compile(r'(?i)(\(l\)|\[l\]|\blive\b|\blangsung\b)')
 
-# Fungsi Deteksi Angka (Anti-Kloning beIN/SPOTV)
 def get_channel_number(text):
     nums = re.findall(r'\d+', text)
     return nums[0] if nums else '0'
@@ -54,7 +53,7 @@ def get_flag(n):
     if any(x in n for x in [' ar', 'mena', 'arab', 'premium']): return "🇸🇦"
     return "🇮🇩"
 
-# --- A. FILTER CHANNEL (SPORTS ONLY) ---
+# --- FILTER CHANNEL ---
 def is_sports_channel(name):
     n = name.lower()
     if 'astro' in n:
@@ -66,7 +65,7 @@ def is_sports_channel(name):
     sports_keywords = ['bein', 'spotv', 'sport', 'soccer', 'champions', 'espn', 'arena bola', 'golf', 'tennis', 'motor', 'fight', 'wwe', 'tnt', 'sky', 'optus', 'hub', 'mola', 'vidio', 'cbs']
     return any(x in n for x in sports_keywords)
 
-# --- B. BUKU HITAM (ANTI SIARAN ULANG) ---
+# --- BUKU HITAM ---
 def is_allowed_event(title):
     if not title: return False
     t = title.lower()
@@ -80,7 +79,7 @@ def is_allowed_event(title):
         return False
     return True
 
-# --- C. GEMBOK BENUA (HUKUM KICK-OFF) ---
+# --- GEMBOK BENUA ---
 def is_valid_kickoff(st, title):
     w = st.hour + (st.minute / 60.0)
     t = title.lower()
@@ -118,8 +117,6 @@ def main():
     now_wib = datetime.utcnow() + timedelta(hours=7)
     match_data = {}
     epg_chans, epg_logos = {}, {}
-    
-    # Batas Horizon: Tepat 24 Jam ke Depan
     limit_date = now_wib + timedelta(hours=24)
 
     ses = requests.Session()
@@ -145,17 +142,14 @@ def main():
                 st, sp = parse_time(pg.get("start")), parse_time(pg.get("stop"))
                 if not st or not sp: continue
                 
-                # ATURAN MENGHANGUSKAN ACARA (Sudah lewat / Melewati 24 jam)
                 if sp <= now_wib: continue 
                 if st >= limit_date: continue 
                 
                 title = pg.findtext("title") or ""
                 
-                # ATURAN BUKU HITAM & GEMBOK BENUA
                 if not is_allowed_event(title): continue
                 if not is_valid_kickoff(st, title): continue
                 
-                # DETEKSI APAKAH LIVE SAAT INI
                 is_live = (st - timedelta(minutes=5)) <= now_wib < sp
                 
                 if cid not in match_data: match_data[cid] = []
@@ -169,9 +163,8 @@ def main():
         except Exception:
             continue
 
-    print("Step 2: Merakit M3U (SEDANG TAYANG & AKAN TAYANG)...")
+    print("Step 2: Merakit M3U (Live Bebas Duplikat & Upcoming 1 Baris)...")
     hasil_m3u = []
-    live_tracker = set()
     up_tracker = set()
     
     for idx, url in enumerate(MASTER_SOURCES, 1):
@@ -186,7 +179,7 @@ def main():
                     if ln_clean.upper().startswith("#EXTINF"):
                         if any(t.upper().startswith("#EXTINF") for t in block):
                             block = [] 
-                    block.append(ln) 
+                    block.append(ln_clean) 
                 else:
                     stream_url = ln_clean
                     extinf_idx = next((i for i, t in enumerate(block) if t.upper().startswith("#EXTINF")), -1)
@@ -198,13 +191,20 @@ def main():
                             m3u_name = m3u_name.strip()
                             
                             if is_sports_channel(m3u_name):
+                                # 1. Sedot Logo Asli M3U (Buat Jaga-Jaga)
+                                logo_match = re.search(r'(?i)tvg-logo=["\']([^"\']*)["\']', raw_attrs)
+                                orig_logo = logo_match.group(1) if logo_match else ""
+
+                                # 2. Bersihkan atribut HATI-HATI (Amankan #EXTINF)
                                 clean_attr = re.sub(r'(?i)\s*(group-title|tvg-id|tvg-logo|tvg-name)=["\'][^"\']*["\']', '', raw_attrs).strip()
+                                if not clean_attr.upper().startswith("#EXTINF"):
+                                    clean_attr = "#EXTINF:-1 " + clean_attr.replace('#EXTINF:-1', '').replace('#EXTINF:0', '').strip()
+
                                 flag = get_flag(m3u_name)
                                 n_m3u = normalisasi(m3u_name)
                                 num_m3u = get_channel_number(n_m3u)
                                 
                                 matched_cid = None
-                                # Akurasi Pencocokan Anti-Kloning
                                 for cid, ename in epg_chans.items():
                                     n_epg = normalisasi(ename)
                                     if n_epg == n_m3u or (n_epg in n_m3u and len(n_epg) > 4):
@@ -212,42 +212,48 @@ def main():
                                             matched_cid = cid
                                             break
                                 
-                                # Jika ketemu jadwalnya, urai satu-satu
+                                has_live_or_upcoming = False
                                 if matched_cid and matched_cid in match_data:
                                     for ev in match_data[matched_cid]:
                                         jam = f"{ev['start'].strftime('%H:%M')}-{ev['stop'].strftime('%H:%M')} WIB"
-                                        logo = ev['logo'] or epg_logos.get(matched_cid, "")
+                                        
+                                        # HIERARKI LOGO: EPG Program -> EPG Channel -> Logo M3U Asli Karepech
+                                        final_logo = ev['logo'] if ev.get('logo') else (epg_logos.get(matched_cid) if epg_logos.get(matched_cid) else orig_logo)
+                                        
+                                        has_live_or_upcoming = True
                                         
                                         if ev["live"]:
-                                            # KATEGORI: 🔴 SEDANG TAYANG (Full Block Link)
-                                            if stream_url in live_tracker: continue
-                                            live_tracker.add(stream_url)
-                                            
+                                            # LIVE: BEBAS DUPLIKAT (Tanpa Tracking URL)
                                             judul = f"{flag} 🔴 {jam} - {ev['title']} [{m3u_name}] ({idx})"
                                             live_block = list(block) 
-                                            live_block[extinf_idx] = f'{clean_attr} group-title="🔴 SEDANG TAYANG" tvg-id="{matched_cid}" tvg-logo="{logo}", {judul}'
-                                            
+                                            live_block[extinf_idx] = f'{clean_attr} group-title="🔴 SEDANG TAYANG" tvg-id="{matched_cid}" tvg-logo="{final_logo}", {judul}'
                                             hasil_m3u.append({"order": 0, "sort_name": m3u_name, "block_data": live_block + [stream_url]})
                                             
                                         else:
-                                            # KATEGORI: 📅 AKAN TAYANG (Simple Video 5 Menit)
+                                            # UPCOMING: GEMBOK KETAT (1 Acara = 1 Baris)
                                             up_key = f"{matched_cid}_{ev['start'].timestamp()}"
                                             if up_key in up_tracker: continue
                                             up_tracker.add(up_key)
                                             
                                             lbl = "Besok " if ev['start'].date() == (now_wib.date() + timedelta(days=1)) else ""
                                             judul = f"{flag} ⏳ {lbl}{jam} - {ev['title']} ({idx})"
-                                            
-                                            up_extinf = f'{clean_attr} group-title="📅 AKAN TAYANG" tvg-id="{matched_cid}" tvg-logo="{logo}", {judul}'
-                                            
+                                            up_extinf = f'{clean_attr} group-title="📅 AKAN TAYANG" tvg-id="{matched_cid}" tvg-logo="{final_logo}", {judul}'
                                             hasil_m3u.append({"order": 1, "sort_name": str(ev['start'].timestamp()), "block_data": [up_extinf, LINK_UPCOMING]})
+                                
+                                # CHANNEL PENYELAMAT: Kalau tidak ada di EPG, TETAP MASUKKAN! (Dengan nama dan logo yang benar)
+                                if not has_live_or_upcoming:
+                                    final_logo = epg_logos.get(matched_cid) if (matched_cid and epg_logos.get(matched_cid)) else orig_logo
+                                    judul = f"{flag} 🔴 {m3u_name} (Siaran Aktif) ({idx})"
+                                    
+                                    live_block = list(block) 
+                                    live_block[extinf_idx] = f'{clean_attr} group-title="🔴 SEDANG TAYANG" tvg-id="{matched_cid or ""}" tvg-logo="{final_logo}", {judul}'
+                                    hasil_m3u.append({"order": 0, "sort_name": m3u_name, "block_data": live_block + [stream_url]})
                                             
                     block = [] 
         except Exception as e:
             continue
 
     print("Step 3: Rendering Playlist TiviMate...")
-    # Urutkan berdasarkan Kategori (Live di atas, Upcoming di bawah), baru berdasarkan Abjad/Jam
     hasil_m3u.sort(key=lambda x: (x["order"], x["sort_name"].lower()))
     
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -257,6 +263,6 @@ def main():
         for item in hasil_m3u: 
             f.write("\n".join(item["block_data"]) + "\n")
 
-    print(f"Selesai! {len(hasil_m3u)} Jadwal 24 Jam Siap Meluncur ke TiviMate.")
+    print(f"Selesai! {len(hasil_m3u)} Jadwal Siap Meluncur ke TiviMate.")
 
 if __name__ == "__main__": main()
