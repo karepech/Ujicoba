@@ -28,7 +28,7 @@ http://zozotv.xyz:8080/live/abemohdz8/zoz139/400.ts
 #KODIPROP:inputstream.adaptive.license_type=org.w3.clearkey
 #KODIPROP:inputstream.adaptive.license_key=fb06bb8266fb4a998e7c4e7e90461556:52242587d8106c4b3ed596c7a56b4e28
 https://load.perfecttv.net/rwt.mpd?username=vip_3klp0es8&password=wg3piwEs&channel=bola1fhd|user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36
-#EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroBadminton" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVRER.jpg", 🇲🇾 🔴 03:00-04:00 WIB - BWF Malaysia Open: HL [ASTRO BADMINTON] (1)
+#EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroBadminton" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVRES.jpg", 🇲🇾 🔴 04:00-05:00 WIB - BWF Malaysia Open: HL [ASTRO BADMINTON] (1)
 #KODIPROP:inputstream.adaptive.license_type=org.w3.clearkey
 #KODIPROP:inputstream.adaptive.license_key=0bbb23a5ad81427fa6817864b2383402:81e055a8d6ddf6392ae9033f0f037b98
 https://load.perfecttv.net/rwt.mpd?username=vip_3klp0es8&password=wg3piwEs&channel=badmintonhd|user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36
@@ -48,13 +48,13 @@ https://raw.githubusercontent.com/Bluestraveller13/super-duper-spork/refs/heads/
 http://zozotv.xyz:8080/live/abemohdz8/zoz139/158.ts
 #EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroFootball" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KTFNN.jpg", 🇲🇾 🔴 02:35-05:00 WIB - Serie A: Udinese vs Juventus [ASTRO FOOTBALL LIVE] (1)
 http://208.87.242.55/livehttpplay?channel_id=13305
-#EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroGrandstand" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KWALY.jpg", 🇲🇾 🔴 03:00-04:00 WIB - Reaction Sports 2026: January Edition [ASTRO GRANDSTAND] (1)
+#EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroGrandstand" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVWFM.jpg", 🇲🇾 🔴 04:00-10:00 WIB - UFC 2026: Emmett vs. Vallejos [ASTRO GRANDSTAND] (1)
 ##KODIPROP:inputstream.adaptive.license_type=clearkey
 #EXTVLCOPT:http-user-agent=Mozilla/5.0
 ##KODIPROP:inputstream.adaptive.license_key=5be66a6f88efee3d6e30f72a9c58e310:168f3fadfc730ba3dfc932f7c430e27d
 ##https://ast.livecricketsl.live/proxy/sg.php/https://linearjitp-playback.astro.com.my/dash-wv/linear/2701/default_ott.mpd
 http://208.87.242.55/livehttpplay?channel_id=13301
-#EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroGrandstand" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KWALY.jpg", 🇲🇾 🔴 03:00-04:00 WIB - Reaction Sports 2026: January Edition [ASTRO GRANDSTAND] (1)
+#EXTINF:-1 group-title="🔴 SEDANG TAYANG" tvg-id="AstroGrandstand" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVWFM.jpg", 🇲🇾 🔴 04:00-10:00 WIB - UFC 2026: Emmett vs. Vallejos [ASTRO GRANDSTAND] (1)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0
 http://zozotv.xyz:8080/live/abemohdz8/zoz139/570.ts
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0
@@ -97,10 +97,6 @@ http://mytv-extra.com:80/V713SWTY/D8T8KGTL/2145
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=9e8888ac964d430cbfef9c922ee6714b:9b1dbd9f59a39a9ebaf1fb8e665a3ef3
 https://tglmp02.akamaized.net/out/v1/1063ebb215c14312ba9d4e415ac706d2/manifest.mpd
-#EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroGrandstand" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVWFM.jpg", 🇲🇾 ⏳ 04:00-10:00 WIB - UFC 2026: Emmett vs. Vallejos (1)
-https://bwifi.my.id/5menit.mp4
-#EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroBadminton" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVRES.jpg", 🇲🇾 ⏳ 04:00-05:00 WIB - BWF Malaysia Open: HL (1)
-https://bwifi.my.id/5menit.mp4
 #EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroPremierLeague" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KIZMY.jpg", 🇲🇾 ⏳ 05:00-05:30 WIB - Chelsea vs Manchester City 2009/10 (1)
 https://bwifi.my.id/5menit.mp4
 #EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroFootball" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KTGEM.jpg", 🇲🇾 ⏳ 05:00-07:00 WIB - EFL: Coventry vs Southampton (1)
@@ -268,4 +264,8 @@ https://bwifi.my.id/5menit.mp4
 #EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="PremierSports" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/resizedImages/PremierSports_IVP_LAND_1280x720.jpg", 🇮🇩 ⏳ Besok 03:22-05:12 WIB - Guinness Six Nations: Ireland V Scotland (1)
 https://bwifi.my.id/5menit.mp4
 #EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroPremierLeague2" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/resizedImages/AstroPremierLeague2_2024_IVP_LAND_1280x720.jpg", 🇲🇾 ⏳ Besok 03:30-04:00 WIB - PL Stories:: Unai Emery (1)
+https://bwifi.my.id/5menit.mp4
+#EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroPremierLeague2" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/10000707X890750.jpg", 🇲🇾 ⏳ Besok 04:00-05:00 WIB - 1-to-11:: Luis Garcia (1)
+https://bwifi.my.id/5menit.mp4
+#EXTINF:-1 group-title="📅 AKAN TAYANG" tvg-id="AstroBadminton" tvg-logo="https://s3-ap-southeast-1.amazonaws.com/ams-astro/production/images/KVREU.jpg", 🇲🇾 ⏳ Besok 04:00-05:00 WIB - BWF Indonesia Masters: HL (1)
 https://bwifi.my.id/5menit.mp4
