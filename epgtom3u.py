@@ -163,7 +163,7 @@ def main():
         except Exception:
             continue
 
-    print("Step 2: Merakit M3U (Live Bebas Duplikat & Upcoming 1 Baris)...")
+    print("Step 2: Merakit M3U (HANYA YANG ADA EPG)...")
     hasil_m3u = []
     up_tracker = set()
     
@@ -212,7 +212,7 @@ def main():
                                             matched_cid = cid
                                             break
                                 
-                                has_live_or_upcoming = False
+                                # HANYA MASUK JIKA ADA JADWAL DI EPG
                                 if matched_cid and matched_cid in match_data:
                                     for ev in match_data[matched_cid]:
                                         jam = f"{ev['start'].strftime('%H:%M')}-{ev['stop'].strftime('%H:%M')} WIB"
@@ -220,10 +220,8 @@ def main():
                                         # HIERARKI LOGO: EPG Program -> EPG Channel -> Logo M3U Asli Karepech
                                         final_logo = ev['logo'] if ev.get('logo') else (epg_logos.get(matched_cid) if epg_logos.get(matched_cid) else orig_logo)
                                         
-                                        has_live_or_upcoming = True
-                                        
                                         if ev["live"]:
-                                            # LIVE: BEBAS DUPLIKAT (Tanpa Tracking URL)
+                                            # LIVE: BEBAS DUPLIKAT
                                             judul = f"{flag} 🔴 {jam} - {ev['title']} [{m3u_name}] ({idx})"
                                             live_block = list(block) 
                                             live_block[extinf_idx] = f'{clean_attr} group-title="🔴 SEDANG TAYANG" tvg-id="{matched_cid}" tvg-logo="{final_logo}", {judul}'
@@ -239,15 +237,6 @@ def main():
                                             judul = f"{flag} ⏳ {lbl}{jam} - {ev['title']} ({idx})"
                                             up_extinf = f'{clean_attr} group-title="📅 AKAN TAYANG" tvg-id="{matched_cid}" tvg-logo="{final_logo}", {judul}'
                                             hasil_m3u.append({"order": 1, "sort_name": str(ev['start'].timestamp()), "block_data": [up_extinf, LINK_UPCOMING]})
-                                
-                                # CHANNEL PENYELAMAT: Kalau tidak ada di EPG, TETAP MASUKKAN! (Dengan nama dan logo yang benar)
-                                if not has_live_or_upcoming:
-                                    final_logo = epg_logos.get(matched_cid) if (matched_cid and epg_logos.get(matched_cid)) else orig_logo
-                                    judul = f"{flag} 🔴 {m3u_name} (Siaran Aktif) ({idx})"
-                                    
-                                    live_block = list(block) 
-                                    live_block[extinf_idx] = f'{clean_attr} group-title="🔴 SEDANG TAYANG" tvg-id="{matched_cid or ""}" tvg-logo="{final_logo}", {judul}'
-                                    hasil_m3u.append({"order": 0, "sort_name": m3u_name, "block_data": live_block + [stream_url]})
                                             
                     block = [] 
         except Exception as e:
