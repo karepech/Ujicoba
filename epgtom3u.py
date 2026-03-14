@@ -11,7 +11,6 @@ EPG_URLS = [
     "https://epgshare01.online/epgshare01/epg_ripper_ALL_SPORTS.xml.gz"
 ]
 
-# 3 Sumber M3U Karepech (Sesuai Permintaan)
 MASTER_SOURCES = [
     "https://raw.githubusercontent.com/karepech/Karepetv/refs/heads/main/sports_combined.m3u",    # (1)
     "https://raw.githubusercontent.com/karepech/Karepetv/refs/heads/main/event_combined.m3u",     # (2)
@@ -22,7 +21,7 @@ OUTPUT_FILE = "live_matches_only.m3u"
 M3U_HEADER = '#EXTM3U url-tvg="https://www.open-epg.com/generate/bXxbrwUThe.xml" name="🔴 BAKUL WIFI SPORTS"'
 
 # ==========================================
-# 2. MESIN REGEX & FILTER 
+# 2. MESIN REGEX & FILTER (OPTIMASI TV)
 # ==========================================
 RX_CHAMPS = re.compile(r'\b(?:champions?\s*tv|ctv)\s*(\d+)\b')
 RX_STARS = re.compile(r'\bsports?\s+stars?\b')
@@ -37,8 +36,7 @@ def normalisasi(n):
     n = RX_CHAMPS.sub(r'champions tv \1', n)
     n = RX_STARS.sub('sportstars', n)
     n = RX_SPOTV.sub('spotv', n)
-    n = RX_KUALITAS.sub('', n).strip()
-    return n
+    return RX_KUALITAS.sub('', n).strip()
 
 def get_flag(n):
     n = n.lower()
@@ -50,55 +48,55 @@ def get_flag(n):
     if any(x in n for x in [' ar', 'mena', 'arab', 'premium']): return "🇸🇦"
     return "🇮🇩"
 
-# --- A. FILTER CHANNEL (SPORTS & ASTRO WHITELIST) ---
+# --- A. FILTER CHANNEL (SPORTS ONLY) ---
 def is_sports_channel(name):
     n = name.lower()
     if 'astro' in n:
         haram = ['awani','ria','oasis','prima','rania','citra','hijrah','ceria','warna','shiq','vellithirai','vinmeen','box office', 'a-list']
         if any(x in n for x in haram): return False
         halal_astro = ['arena', 'supersport', 'grandstand', 'premier', 'cricket', 'badminton', 'football', 'golf', 'tennis', 'rugby', 'sport']
-        if not any(x in n for x in halal_astro): return False
-        return True
+        return any(x in n for x in halal_astro)
 
     sports_keywords = ['bein', 'spotv', 'sport', 'soccer', 'champions', 'espn', 'arena bola', 'golf', 'tennis', 'motor', 'fight', 'wwe', 'tnt', 'sky', 'optus', 'hub', 'mola', 'vidio', 'cbs']
     return any(x in n for x in sports_keywords)
 
-# --- B. FILTER BUKU HITAM (ANTI SIARAN ULANG & SAMPAH) ---
+# --- B. BUKU HITAM (ANTI SIARAN ULANG) ---
 def is_allowed_event(title):
     if not title: return False
     t = title.lower()
 
-    # 1. Inisial & Singkatan
     haram_inisial = ["(d)", "[d]", "(r)", "[r]", "(c)", "[c]", "hls", "hl ", "h/l", "rev ", "rep ", "del "]
-    if any(x in t for x in haram_inisial): return False
+    haram_en = ["replay", "delay", "re-run", "rerun", "recorded", "archives", "classic", "rewind", "encore", "highlights", "best of", "the best of", "compilation", "collection", "pre-match", "post-match", "build-up", "build up", "preview", "review", "road to", "kick-off show", "warm up", "magazine", "studio", "talk", "show", "update", "weekly", "planet"]
+    haram_id_my = ["tunda", "siaran tunda", "tertunda", "ulang", "siaran ulang", "tayangan ulang", "ulangan", "rakaman", "cuplikan", "cuplikan gol", "sorotan", "sorotan perlawanan", "rangkuman", "ringkasan", "kilas", "lensa", "jurnal", "terbaik", "aksi terbaik", "pilihan", "pemanasan", "menuju kick off", "pra-perlawanan", "pra perlawanan", "pasca-perlawanan", "sepak mula"]
+    haram_sampah = ["berita", "news", "apa kabar", "religi", "quran", "mekkah", "makkah", "masterchef", "caribbean", "hex", "witchcraft", "cgtn", "arirang", "cctv", "cnn", "al jazeera", "lfctv", "mutv", "chelsea tv"]
 
-    # 2. Bahasa Inggris (Replay, HL, Talkshow)
-    haram_en = [
-        "replay", "delay", "re-run", "rerun", "recorded", "archives", "classic", "rewind", "encore",
-        "highlights", "best of", "the best of", "compilation", "collection",
-        "pre-match", "post-match", "build-up", "build up", "preview", "review", "road to", 
-        "kick-off show", "warm up", "magazine", "studio", "talk", "show", "update", "weekly", "planet"
-    ]
-    if any(x in t for x in haram_en): return False
-
-    # 3. Bahasa Indonesia & Malaysia (Tunda, Ulang, Sorotan)
-    haram_id_my = [
-        "tunda", "siaran tunda", "tertunda", "ulang", "siaran ulang", "tayangan ulang", "ulangan",
-        "rakaman", "cuplikan", "cuplikan gol", "sorotan", "sorotan perlawanan", "rangkuman", 
-        "ringkasan", "kilas", "lensa", "jurnal", "terbaik", "aksi terbaik", "pilihan",
-        "pemanasan", "menuju kick off", "pra-perlawanan", "pra perlawanan", "pasca-perlawanan", "sepak mula"
-    ]
-    if any(x in t for x in haram_id_my): return False
-
-    # 4. Sampah Non-Olahraga
-    haram_sampah = [
-        "berita", "news", "apa kabar", "religi", "quran", "mekkah", "makkah", "masterchef", 
-        "caribbean", "hex", "witchcraft", "cgtn", "arirang", "cctv", "cnn", "al jazeera",
-        "lfctv", "mutv", "chelsea tv"
-    ]
-    if any(x in t for x in haram_sampah): return False
-
+    if any(x in t for x in haram_inisial + haram_en + haram_id_my + haram_sampah): 
+        return False
     return True
+
+# --- C. GEMBOK BENUA (HUKUM KICK-OFF) ---
+def is_valid_kickoff(st, title):
+    w = st.hour + (st.minute / 60.0)
+    t = title.lower()
+
+    # VIP 24 Jam (Lolos Pengecekan Jam)
+    if any(k in t for k in ['badminton','bwf','motogp','f1','qualifying','practice','nba',' fp1',' fp2',' q1','sesi']): 
+        return True
+
+    # Hukum Masing-Masing Benua
+    rules = [
+        (['premier','champions league','serie a','la liga','bundesliga','ucl','uefa','fa cup'], w >= 18.0 or w <= 4.0),
+        (['mls','major league','concacaf','libertadores','sudamericana','liga mx','brasileiro'], 2.0 <= w <= 11.5),
+        (['j-league','k-league','afc','asian','aff','liga 1','bri liga','timnas'], 11.5 <= w <= 22.5),
+        (['saudi','roshn','caf ','africa','afcon'], w >= 20.0 or w <= 6.5),
+        (['a-league','nrl','afl'], 7.5 <= w <= 17.5)
+    ]
+    
+    for keys, cond in rules:
+        if any(k in t for k in keys): return cond
+    
+    # Fallback: Buang acara pagi hari yang mencurigakan (Kecuali ada tulisan VS)
+    return not (4.5 < w < 11.0 and " vs " not in t)
 
 def parse_time(ts):
     if not ts: return None
@@ -106,8 +104,7 @@ def parse_time(ts):
         if len(ts) >= 19 and ('+' in ts or '-' in ts):
             dt = datetime.strptime(ts[:20].strip(), "%Y%m%d%H%M%S %z")
             return dt.astimezone(timezone(timedelta(hours=7))).replace(tzinfo=None)
-        else:
-            return datetime.strptime(ts[:14], "%Y%m%d%H%M%S") + timedelta(hours=7)
+        return datetime.strptime(ts[:14], "%Y%m%d%H%M%S") + timedelta(hours=7)
     except Exception:
         return None
 
@@ -121,7 +118,7 @@ def main():
     ses = requests.Session()
     ses.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
 
-    print("Step 1: Sedot EPG (Mencari acara SAAT INI yang Lolos Filter)...")
+    print("Step 1: Sedot EPG (Cek Real-Time & Gembok Benua)...")
     for url in EPG_URLS:
         try:
             r = ses.get(url, timeout=60).content
@@ -138,16 +135,19 @@ def main():
                 cid = pg.get("channel")
                 if cid not in epg_chans: continue
                 
-                title = pg.findtext("title") or ""
-                # TEMBAK MATI: Buang acara kalau masuk daftar haram!
-                if not is_allowed_event(title): continue
-                
-                st = parse_time(pg.get("start"))
-                sp = parse_time(pg.get("stop"))
+                st, sp = parse_time(pg.get("start")), parse_time(pg.get("stop"))
                 if not st or not sp: continue
                 
-                # REAL-TIME: Hanya simpan yang sedang tayang
+                # Filter 1: Harus Tayang Detik Ini
                 if (st - timedelta(minutes=5)) <= now_wib < sp:
+                    title = pg.findtext("title") or ""
+                    
+                    # Filter 2: Buku Hitam (Anti Siaran Ulang)
+                    if not is_allowed_event(title): continue
+                    
+                    # Filter 3: Gembok Benua (Cek Jam Kick-Off)
+                    if not is_valid_kickoff(st, title): continue
+                    
                     clean_title = RX_LIVE.sub('', title).strip()
                     current_events[cid] = {
                         "title": clean_title,
@@ -156,15 +156,11 @@ def main():
                         "logo": pg.find("icon").get("src") if pg.find("icon") is not None else ""
                     }
         except Exception as e:
-            print(f"Peringatan EPG: {e}")
             continue
 
-    # Membuat Kamus Cerdas Pencocokan Channel
-    epg_smart_map = {}
-    for cid, ename in epg_chans.items():
-        epg_smart_map[normalisasi(ename)] = cid
+    epg_smart_map = {normalisasi(ename): cid for cid, ename in epg_chans.items()}
 
-    print("Step 2: Sedot M3U Karepech (Blok Penuh & Eksekusi Anti-Rungseb)...")
+    print("Step 2: Sedot M3U Karepech (Amankan Full Blok)...")
     hasil_m3u = []
     url_tracker = set()
     
@@ -176,7 +172,6 @@ def main():
                 ln_clean = ln.strip()
                 if not ln_clean or "EXTM3U" in ln_clean.upper(): continue
                 
-                # PAWANG M3U: Mengamankan 1 Blok Penuh (Termasuk Token/User-Agent)
                 if ln_clean.upper().startswith("#EXTINF"):
                     if any(t.upper().startswith("#EXTINF") for t in block):
                         block = [] 
@@ -185,66 +180,39 @@ def main():
                     block.append(ln_clean)
                 else:
                     stream_url = ln_clean
-                    extinf_idx = -1
-                    
-                    # Cari lokasi baris #EXTINF di dalam blok
-                    for i, t in enumerate(block):
-                        if t.upper().startswith("#EXTINF"):
-                            extinf_idx = i
-                            break
+                    extinf_idx = next((i for i, t in enumerate(block) if t.upper().startswith("#EXTINF")), -1)
                     
                     if extinf_idx != -1:
-                        extinf_line = block[extinf_idx]
-                        if "," in extinf_line:
-                            raw_attrs, m3u_name = extinf_line.split(",", 1)
-                            m3u_name = m3u_name.strip()
-                            
-                            # Filter 1: Harus Channel Olahraga
-                            if not is_sports_channel(m3u_name):
-                                block = []
-                                continue
-                                
-                            # Filter 2: Gembok URL Anti-Spam
-                            if stream_url in url_tracker:
-                                block = []
-                                continue
+                        raw_attrs, m3u_name = block[extinf_idx].split(",", 1)
+                        m3u_name = m3u_name.strip()
+                        
+                        if is_sports_channel(m3u_name) and stream_url not in url_tracker:
                             url_tracker.add(stream_url)
-                            
-                            # Bersihkan Atribut untuk ditulis ulang
                             clean_attr = RX_ATTR.sub('', raw_attrs).replace('#EXTINF:-1', '').strip()
-                            flag = get_flag(m3u_name)
-                            
-                            # Pencocokan Instan KTP Channel
-                            matched_cid = None
                             n_m3u = normalisasi(m3u_name)
                             
-                            if n_m3u in epg_smart_map:
-                                matched_cid = epg_smart_map[n_m3u]
-                            else:
-                                for n_epg, cid in epg_smart_map.items():
-                                    if len(n_epg) > 4 and n_epg in n_m3u:
-                                        matched_cid = cid
-                                        break
+                            # Cocokkan ID Channel
+                            matched_cid = epg_smart_map.get(n_m3u)
+                            if not matched_cid:
+                                matched_cid = next((cid for n_epg, cid in epg_smart_map.items() if len(n_epg) > 4 and n_epg in n_m3u), None)
                             
-                            # LOGIKA ANTI-RUNGSEB & REAL-TIME
-                            # Jika jadwal tersedia DAN sedang tayang, TAMPILKAN! Jika tidak, BUANG!
+                            # Filter 4: Anti-Rungseb (Tampilkan hanya yang Lolos Ujian)
                             if matched_cid and matched_cid in current_events:
                                 ev = current_events[matched_cid]
                                 jam = f"{ev['start'].strftime('%H:%M')}-{ev['stop'].strftime('%H:%M')} WIB"
                                 logo = ev['logo'] or epg_logos.get(matched_cid, "")
+                                flag = get_flag(m3u_name)
                                 
                                 judul = f"{flag} 🔴 {jam} - {ev['title']} [{m3u_name}] ({idx})"
                                 block[extinf_idx] = f'#EXTINF:-1 {clean_attr} group-title="🔴 SPORTS SEDANG TAYANG" tvg-id="{matched_cid}" tvg-logo="{logo}", {judul}'
                                 
-                                # Simpan 1 blok utuh beserta URL-nya
                                 hasil_m3u.append({"sort_name": m3u_name, "block_data": block + [stream_url]})
                             
-                    block = [] # Reset blok untuk membaca channel selanjutnya
+                    block = [] 
         except Exception as e:
-            print(f"Peringatan M3U: {e}")
             continue
 
-    print("Step 3: Menyimpan Playlist Bakul Wifi...")
+    print("Step 3: Render Playlist untuk Google TV...")
     hasil_m3u.sort(key=lambda x: x["sort_name"].lower())
     
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -254,6 +222,6 @@ def main():
         for item in hasil_m3u: 
             f.write("\n".join(item["block_data"]) + "\n")
 
-    print(f"🔥 SUKSES! {len(hasil_m3u)} Channel Olahraga AKTIF berhasil diproses.")
+    print(f"Selesai! {len(hasil_m3u)} pertandingan bersih siap ditonton.")
 
 if __name__ == "__main__": main()
